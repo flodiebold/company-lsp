@@ -179,6 +179,10 @@ Returns CANDIDATE with the resolved CompletionItem."
                              candidate)))))
   candidate)
 
+(defun company-lsp--nonblank-str (s)
+  "Return s if it is not a blank string, nil otherwise."
+  (and (not (s-blank-str? s)) s))
+
 (defun company-lsp--rust-completion-snippet (item)
   "Function providing snippet with the rust language.
 It parses the function's signature in ITEM (a CompletionItem)
@@ -189,7 +193,7 @@ to expand its arguments."
            (snippet (when (and detail (s-matches? "^\\(pub \\)?\\(unsafe \\)?fn " detail))
                       (-some--> (substring detail (1+ (s-index-of "(" detail)) (s-index-of ")" detail))
                                 (replace-regexp-in-string "^[^,]*self\\(, \\)?" "" it)
-                                (and (not (s-blank-str? it)) it)
+                                (company-lsp--nonblank-str it)
                                 (s-split ", " it)
                                 (mapconcat (lambda (x) (format "${%s}" x)) it ", ")))))
       (concat "(" (or snippet "$1") ")$0"))))
